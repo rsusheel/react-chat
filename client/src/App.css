@@ -1,0 +1,32 @@
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(128, 128, 128, 0);
+  }
+  
+  /* Works on Chrome, Edge, and Safari */
+  *::-webkit-scrollbar {
+    width: 0px;
+  }
+  
+  *::-webkit-scrollbar-track {
+    background: rgba(255, 166, 0, 0);
+  }
+  
+  *::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.067);
+    border-radius: 20px;
+  }
+  
+  
+  body{
+    background-color: rgb(33, 29, 29);
+    overflow: hidden;
+  }
+  
+  .App {
+    text-align: center;
+  }
+
+  .hide-home-page{
+    display: none;
+  }

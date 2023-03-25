@@ -1,0 +1,134 @@
+.homepage{
+    display: grid;
+    position: fixed;
+    height: 100vh;
+    width: 100vw;
+    color: white;
+}
+
+.homepage-inner{
+    height: 200px;
+    position: relative;
+    top: calc(50vh - 100px);
+    left: calc(50vw - 160px);
+    width: 320px;
+}
+
+.home-input{
+    outline: none;
+    box-sizing: border-box;
+    border: none;
+    height: 40px;
+    padding: 10px 15px;
+    border-radius: 5px 0 0 5px;
+    background-color: rgb(239, 239, 239);
+    font-size: 14px;
+    width: calc(100% - 90px);
+}
+
+.home-input:focus{
+    outline: none;
+    background-color: white;
+}
+
+.home-btn{
+    outline: none;
+    border: none;
+    background-color: rgb(160, 141, 235);
+    color: white;
+    height: 40px;
+    box-sizing: border-box;
+    width: 90px;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+}
+
+.home-btn:focus{
+    outline: none;
+}
+.home-btn:hover{
+    background-color: #3068CC;
+}
+
+.enter-username{
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    margin-bottom: 10px;
+}
+
+.home-username-title{
+    border-radius: 5px 0 0 5px;
+    height: 40px;
+    background-color: rgb(160, 141, 235);
+    display: grid;
+    align-content: center;
+    cursor: default;
+}
+
+.home-username{
+    border-radius: 0 5px 5px 0;
+    width: 100%;
+}
+
+.room-input-title{
+    text-align: left;
+    cursor: default;
+    color: rgb(186, 186, 186);
+    font-weight: 100;
+    margin-bottom: 3px;
+}
+
+.enter-createroom{
+    margin-bottom: 10px;
+}
+
+.enter-joinroom{
+    margin-bottom: 10px;
+}
+
+.home-title{
+    margin-bottom: 20px;
+}
+
+.home-error-msg{
+    box-sizing: border-box;
+    width: 100%;
+    border-radius: 5px;
+    /* border: 1px solid red; */
+    /* background-color: red; */
+    text-align: left;
+    padding: 5px 0;
+    margin-top: 25px;
+    font-size: 14px;
+    font-weight: 100;
+    color: rgb(255, 22, 22);
+    display: grid;
+    grid-template-columns: 1fr 30px 170px 1fr;
+    align-items: center;
+}
+
+.createroom-outer{
+    display: grid;
+    grid-template-columns: 1fr 90px;
+}
+
+.createroom-inner{
+    display: grid;
+    grid-template-columns: 1fr;
+}
+.createroom-inner input{
+    width: 100%;
+}
+
+.createroom-outer button{
+    height: 100%;
+}
+
+.home-createroom{
+    border-radius: 5px 0 0 0;
+    border-bottom: 1px solid rgb(33, 29, 29);
+}
+
+.home-createroom-title{
+    border-radius: 0 0 0 5px;
+}

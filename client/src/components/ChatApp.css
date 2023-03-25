@@ -1,0 +1,148 @@
+.chat-app{
+  width: 0;
+  height: 0;
+}
+
+.main-form{
+  width: 300px;
+  grid-template-columns: 1fr;
+  box-sizing: border-box;
+  position: absolute;
+  top: 0px;
+  right: 362px;
+  transition: 0.4s;
+  box-shadow: -3px 0px 15px rgba(0, 0, 0, 0.47);
+}
+
+.chat-drag{
+  width: 100%;
+  height: 20px;
+  background-color: #3068CC;
+  font-size: 11px;
+  color: white;
+  display: grid;
+  align-items: center;
+}
+
+.chat-drag > svg{
+  fill: white;
+}
+
+.textarea{
+  height: 30px;
+  width: 100%;
+  box-sizing: border-box;
+  resize: none;
+  outline: none;
+  border: none;
+  border-top: 1px solid #211D1D;
+  border-bottom: 1px solid #211D1D;
+  box-sizing: border-box;
+  height: 50px;
+  padding: 15px 7px;
+  background-color: white;
+}
+
+.textarea-diabled{
+  background-color: rgb(180, 180, 180);
+}
+
+.textarea:focus{
+  outline: none;
+}
+
+.message-area{
+  box-sizing: border-box;
+  width: 100%;
+  height: calc(100vh - 110px);
+  background-color: white;
+  overflow-y: scroll;
+  text-align: left;
+  padding: 15px 0px 5px 0px;
+  color: green;
+}
+
+.user{
+  color: black;
+  margin-bottom: 4px;
+  background-color: #D6D6D6;
+  border-radius: 0px 15px 15px 15px;
+  padding: 0 10px;
+  width: 100%;
+  max-width: 200px;
+  margin-left: 7px;
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.you{
+  color: white;
+  padding: 0 10px;
+  margin-bottom: 4px;
+  background-color: #3068CC;
+  border-radius: 15px 0 15px 15px;
+  width: 100%;
+  max-width: 200px;
+  min-width: 100px;
+  margin-left: 73px;
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.you-indicator{
+  text-align: center;
+  color: rgba(255, 255, 255, 0.577);
+  font-size: 10px;
+  padding-top: 4px;
+}
+
+.you-message{
+  padding-top: 5px;
+  width: 100%;
+  word-break: break-all;
+  hyphens: manual;
+}
+
+.user-indicator{
+  text-align: center;
+  color: rgba(0, 0, 0, 0.577);
+  font-size: 10px;
+  padding-top: 4px;
+}
+
+.user-username{
+  font-size: 13px;
+  font-weight: bold;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.81);
+  padding: 4px 0 2px 0;
+}
+
+.user-message{
+  padding-top: 5px;
+  width: 100%;
+  word-break: break-all;
+  hyphens: manual;
+}
+
+
+.you-username{
+  font-size: 13px;
+  font-weight: bold;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.81);
+  padding: 4px 0px 2px 0;
+}
+
+.submit-button{
+  outline: none;
+  border: none;
+  width: 100%;
+  height: 40px;
+  background-color: #3068CC;
+  color: white;
+  display: grid;
+  align-items: center;
+  font-size: 14px;
+  box-sizing: border-box;
+}

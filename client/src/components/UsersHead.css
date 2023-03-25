@@ -1,0 +1,32 @@
+.users-head{
+    background-color: rgb(18, 18, 18);
+    height: 80px;
+    color: rgba(255, 255, 255, 0.724);
+    box-shadow: 0px 2px 10px rgba(164, 164, 164, 0.082);
+    position: absolute;
+    width: 100%;
+    z-index: 20;
+    display: grid;
+    align-items: center;
+    display: grid;
+    justify-items: center;
+    font-size: 12px;
+    grid-template-columns: 1fr 1fr;
+}
+
+.users-head-status{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 10px;
+    align-items: center;
+}
+
+.users-head-status-one{
+    display: grid;
+    justify-items: right;
+}
+
+.users-head-status-two{
+    display: grid;
+    justify-items: left;
+}
