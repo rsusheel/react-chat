@@ -9,9 +9,7 @@ import Sidebars from "./components/Sidebars";
 import Header from "./components/Header";
 import Media from "./components/Media";
 
-
 const socket = io.connect("http://localhost:3001");
-
 
 function App() {
   const data = useSelector((state) => state.personal);
@@ -29,7 +27,7 @@ function App() {
           <ChatApp socket={socket} />
           <Canvas socket={socket} />
           <Users socket={socket} /> */}
-          <Media/>
+          <Media socket={socket}/>
           {/* <Sidebars/> */}
         </>
       )}

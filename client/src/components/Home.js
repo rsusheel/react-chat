@@ -9,8 +9,6 @@ import {
   updateAllState,
 } from "../redux";
 
-import { usePeer } from "./WebRTC/Peer";
-
 function Home(props) {
   const socket = props.socket;
 
@@ -26,8 +24,6 @@ function Home(props) {
   const [room, setRoom] = useState("");
 
   const [errorMsg, setErrorMsg] = useState("");
-
-  const { peer, createOffer, createAnswer, setRemoteAnswer, sendStream, remoteStream } = usePeer()
 
   const singleEffect = useRef(true);
 
@@ -71,29 +67,6 @@ function Home(props) {
         socket.emit("invalid_leave_exit_room", data);
       });
 
-
-
-
-
-      socket.on("incoming-call", async data => {
-        const ans = await createAnswer(data.offer)
-        console.log('remote and local desc is set')
-        console.log(data)
-        socket.emit("call-accepted", {...data, answer: ans})
-      })
-
-      socket.on("call-accepted-res", async data => {
-        console.log('setting remote desc')
-        await setRemoteAnswer(data.answer)
-        console.log("call got accepted")
-      })
-
-
-
-
-
-
-
       singleEffect.current = false;
     }
   }, [socket]);
@@ -114,6 +87,7 @@ function Home(props) {
             break;
           }
         }
+        console.log('check 3')
         socket.emit("userCheck", {
           exitRoom: data.exitRoom,
           vun: vun,
@@ -121,6 +95,7 @@ function Home(props) {
           username: data.username,
           locked: uniData.locked,
         });
+        console.log('check 2')
       };
       socket.on("get_users_list", func);
       return () => socket.off("get_users_list", func);
@@ -177,9 +152,8 @@ function Home(props) {
       setErrorMsg("Username cannot be empty!");
     } else {
       socket.emit("join_room", { username: username, room: room });
-      const offer = await createOffer()
-      socket.emit("call-room", { room: room, offer: offer})
-      console.log('local desc is set')
+      console.log("room joined")
+      socket.emit("room:join", {email: username, room: room})
     }
 
     // dispatch(joinRoom({ username, room }));
@@ -188,19 +162,6 @@ function Home(props) {
     setNewRoomTitle("");
     setRoom("");
   };
-
-  const handleNegotation = () => {
-    const localOffer = peer.localDescription
-    socket.emit("call-room", {room: room, offer: localOffer})
-  }
-
-  useEffect(()=>{
-    peer.addEventListener('negotiationneeded', handleNegotation)
-
-    return () => {
-      peer.removeEventListener('negotiationneeded', handleNegotation)
-    }
-  }, [peer, handleNegotation])
 
   return (
     <div className="homepage">

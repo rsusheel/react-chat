@@ -1,10 +1,10 @@
 import React from 'react'
 import Audio from './WebRTC/Audio'
 
-function Media() {
+function Media(props) {
   return (
     <div>
-        <Audio/>
+        <Audio socket={props.socket}/>
     </div>
   )
 }
