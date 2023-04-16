@@ -152,8 +152,6 @@ function Home(props) {
       setErrorMsg("Username cannot be empty!");
     } else {
       socket.emit("join_room", { username: username, room: room });
-      console.log("room joined")
-      socket.emit("room:join", {email: username, room: room})
     }
 
     // dispatch(joinRoom({ username, room }));
