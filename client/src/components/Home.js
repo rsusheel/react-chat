@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import "./Home.css";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -14,7 +14,6 @@ import peer from "./WebRTC/peer";
 
 function Home(props) {
   const socket = props.socket;
-
   const dispatch = useDispatch();
   const users = useSelector((state) => state.universal.users);
   const creator = useSelector((state) => state.personal.creator);
@@ -26,120 +25,13 @@ function Home(props) {
   const [newRoomTitle, setNewRoomTitle] = useState("");
   const [room, setRoom] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
-
-  const [peerConnections, setPeerConnections] = useState(new Map([]))
-  const [socketId, setSocketId] = useState('')
-  const [socketIds, setSocketIds] = useState([])
-
-  const singleEffect = useRef(true);
-
-  // test function to check the values are set or not
-  useEffect(()=>{
-    console.log(socketId)
-    console.log(pdata)
-    getRemoteSocketId(pdata.room)
-  }, [socketId])
-
-  useEffect(()=>{
-    console.log(socketIds)
-  }, [socketIds])
-
-  useEffect(() => {
-    if (singleEffect.current) {
-      socket.on("new_joinee", (data) => {
-        dispatch(updateRoomInfo({ username: data.username }));
-        dispatch(updateSocketIds({socketId: data.socketId}))
-        socket.emit('set_socket_id_self', {socketId: data.socketId})
-      });
-
-      socket.on("update_all_state", (data) => {
-        dispatch(updateAllState(data));
-      });
-
-      socket.on("create_room_valid", (data) => {
-        dispatch(createRoom({ username: data.username, room: data.room, roomTitle: data.roomTitle }));
-        socket.emit('set_socket_id_self', {socketId: data.socketId})
-      });
-
-      socket.on('set_socket_id_self', (data) => {
-        console.log("setting socket id")
-        setSocketId(data.socketId)
-      })
-
-      socket.on("room_locked", (data)=>{
-        setErrorMsg("The room is locked!");
-      })
-
-      socket.on("join_room_valid", (data) => {
-        dispatch(joinRoom({ username: data.username, room: data.room }));
-        socket.emit("control_to_exit_room", data);
-      });
-
-      socket.on("exit_room_user", (data) => {
-        socket.emit("leave_exit_room", data);
-      });
-
-      socket.on("invalid_new_room", () => {
-        setErrorMsg("Room already exist!");
-      });
-
-      socket.on("invalid_join_room", () => {
-        setErrorMsg("Room doesn't exist!");
-      });
-
-      socket.on("username_already_exist", (data) => {
-        setErrorMsg("Username already exist!");
-        socket.emit("invalid_leave_exit_room", data);
-      });
-
-      socket.on("remove_disconnected_user", (data) => {
-        dispatch(leaveRoom({username: data.username}))
-        dispatch(userLeftSocketIds({socketId: data.socketId}))
-      })
-
-      singleEffect.current = false;
-    }
-  }, [socket]);
-
-  useEffect(() => {
-    pdata.room === ""
-      ? (document.getElementsByClassName("homepage")[0].style.display = "block")
-      : (document.getElementsByClassName("homepage")[0].style.display = "none");
-  }, [pdata.room]);
-
-  useEffect(() => {
-    if (pdata.creator) {
-      const func = (data) => {
-        var vun = true;
-        for (let i = 0; i < uniData.users.length; i++) {
-          if (data.username === uniData.users[i]) {
-            vun = false;
-            break;
-          }
-        }
-        socket.emit("userCheck", {
-          exitRoom: data.exitRoom,
-          vun: vun,
-          room: data.room,
-          username: data.username,
-          locked: uniData.locked,
-        });
-      };
-      socket.on("get_users_list", func);
-      return () => socket.off("get_users_list", func);
-    }
-  }, [socket, uniData]);
-
-  useEffect(() => {
-    if (creator) {
-      socket.emit("update_all", uniData);
-    }
-  }, [users]);
+  const [peerConnections, setPeerConnections] = useState(new Map([]));
+  const [socketId, setSocketId] = useState("");
 
   const changeUsername = (e) => {
     setUsername(e.target.value);
   };
-
+  
   const changeNewRoom = (e) => {
     setNewRoom(e.target.value);
   };
@@ -152,6 +44,166 @@ function Home(props) {
     setRoom(e.target.value);
   };
 
+  //Socket events functions - START
+
+  const newJoinee = (data) => {
+    dispatch(updateRoomInfo({ username: data.username }));
+    dispatch(updateSocketIds({ socketId: data.socketId }));
+    console.log("new joineee");
+    console.log(data);
+    socket.emit("set_socket_id_self", { socketId: data.socketId });
+  };
+
+  const updateAllStates = (data) => {
+    dispatch(updateAllState(data));
+  };
+
+  const createRoomValid = (data) => {
+    dispatch(
+      createRoom({
+        username: data.username,
+        room: data.room,
+        roomTitle: data.roomTitle,
+      })
+    );
+    socket.emit("set_socket_id_self", { socketId: data.socketId });
+  };
+
+  const setSocketIdSelf = (data) => {
+    console.log("setting socket id");
+    setSocketId(data.socketId);
+  };
+
+  const roomLocked = (data) => {
+    setErrorMsg("The room is locked!");
+  };
+
+  const joinRoomValid = (data) => {
+    dispatch(joinRoom({ username: data.username, room: data.room }));
+    socket.emit("control_to_exit_room", data);
+  };
+
+  const exitRoomUser = (data) => {
+    socket.emit("leave_exit_room", data);
+  };
+
+  const invalidNewRoom = () => {
+    setErrorMsg("Room already exist!");
+  };
+
+  const invalidJoinRoom = () => {
+    setErrorMsg("Room doesn't exist!");
+  };
+
+  const usernameAlreadyExist = (data) => {
+    setErrorMsg("Username already exist!");
+    socket.emit("invalid_leave_exit_room", data);
+  };
+
+  const removeDisconnectedUser = (data) => {
+    dispatch(leaveRoom({ username: data.username }));
+    dispatch(userLeftSocketIds({ socketId: data.socketId }));
+  };
+
+  const getUsersList = (data) => {
+    if (pdata.creator) {
+      var vun = true;
+      for (let i = 0; i < uniData.users.length; i++) {
+        if (data.username === uniData.users[i]) {
+          vun = false;
+          break;
+        }
+      }
+      socket.emit("userCheck", {
+        exitRoom: data.exitRoom,
+        vun: vun,
+        room: data.room,
+        username: data.username,
+        locked: uniData.locked,
+      });
+    }
+  };
+
+  const socketIdRequest = (data) => {
+    socket.emit("sent_socket_id", { ...data, socketId: socketId });
+  };
+
+  const setRemoteSocketIds = (data) => {
+    dispatch(updateSocketIds({ socketId: data.data.socketId }));
+    console.log("all socket ids receiveddd");
+  };
+
+  //Socket events functions - END
+
+  useEffect(() => {
+    socket.on("new_joinee", newJoinee);
+    socket.on("update_all_states", updateAllStates);
+    socket.on("create_room_valid", createRoomValid);
+    socket.on("set_socket_id_self", setSocketIdSelf);
+    socket.on("room_locked", roomLocked);
+    socket.on("join_room_valid", joinRoomValid);
+    socket.on("exit_room_user", exitRoomUser);
+    socket.on("invalid_new_room", invalidNewRoom);
+    socket.on("invalid_join_room", invalidJoinRoom);
+    socket.on("username_already_exist", usernameAlreadyExist);
+    socket.on("remove_disconnected_user", removeDisconnectedUser);
+    socket.on("get_users_list", getUsersList);
+    socket.on("socket_id_request", socketIdRequest);
+    socket.on("set_remote_socket_ids", setRemoteSocketIds);
+
+    return () => {
+      socket.off("new_joinee", newJoinee);
+      socket.off("update_all_state", updateAllStates);
+      socket.off("create_room_valid", createRoomValid);
+      socket.off("set_socket_id_self", setSocketIdSelf);
+      socket.off("room_locked", roomLocked);
+      socket.off("join_room_valid", joinRoomValid);
+      socket.off("exit_room_user", exitRoomUser);
+      socket.off("invalid_new_room", invalidNewRoom);
+      socket.off("invalid_join_room", invalidJoinRoom);
+      socket.off("username_already_exist", usernameAlreadyExist);
+      socket.off("remove_disconnected_user", removeDisconnectedUser);
+      socket.off("get_users_list", getUsersList);
+      socket.off("socket_id_request", socketIdRequest);
+      socket.off("set_remote_socket_ids", setRemoteSocketIds);
+    };
+  }, [
+    socket,
+    newJoinee,
+    updateAllStates,
+    createRoomValid,
+    setSocketIdSelf,
+    roomLocked,
+    joinRoomValid,
+    exitRoomUser,
+    invalidNewRoom,
+    invalidJoinRoom,
+    usernameAlreadyExist,
+    removeDisconnectedUser,
+    getUsersList,
+    socketIdRequest,
+    setRemoteSocketIds,
+  ]);
+
+  useEffect(() => {
+    pdata.room === ""
+      ? (document.getElementsByClassName("homepage")[0].style.display = "block")
+      : (document.getElementsByClassName("homepage")[0].style.display = "none");
+  }, [pdata.room]);
+
+  useEffect(() => {
+    if (creator) {
+      socket.emit("update_all", uniData);
+    }
+  }, [users]);
+
+  useEffect(() => {
+    socket.emit("get_remote_socket_id", {
+      requestingUser: socketId,
+      room: pdata.room,
+    });
+  }, [socketId]);
+
   const createRoomBtn = (e) => {
     if (newRoom === "" && username === "") {
       setErrorMsg("Please enter valid details");
@@ -160,10 +212,12 @@ function Home(props) {
     } else if (newRoom === "") {
       setErrorMsg("Please enter room name!");
     } else {
-      socket.emit("new_room", { username: username, room: newRoom, roomTitle: newRoomTitle });
+      socket.emit("new_room", {
+        username: username,
+        room: newRoom,
+        roomTitle: newRoomTitle,
+      });
     }
-
-    // dispatch(createRoom({ username: username, room: newRoom }));
     setUsername("");
     setNewRoom("");
     setNewRoomTitle("");
@@ -180,78 +234,13 @@ function Home(props) {
       setErrorMsg("Username cannot be empty!");
     } else {
       await socket.emit("join_room", { username: username, room: room });
-      console.log("sending offer")
+      console.log("sending offer");
     }
-
-    // dispatch(joinRoom({ username, room }));
     setUsername("");
     setNewRoom("");
     setNewRoomTitle("");
     setRoom("");
   };
-
-  const handleRequestSocketId = (data) => {
-    socket.emit('sent_socket_id', {...data, socketId: socketId})
-  }
-
-  const handleSetRemoteSocketIds = (data) => {
-    dispatch(updateSocketIds({socketId: data.data.socketId}))
-    console.log("all socket ids receiveddd")
-  }
-
-  useEffect(() => {
-    socket.on('socket_id_request', handleRequestSocketId)
-    socket.on('set_remote_socket_ids', handleSetRemoteSocketIds)
-
-    return () => {
-      socket.off("socket_id_request", handleRequestSocketId);
-      socket.off('set_remote_socket_ids', handleSetRemoteSocketIds)
-    };
-  }, [
-    socket,
-    handleRequestSocketId,
-    handleSetRemoteSocketIds,
-  ]);
-
-
-  const getRemoteSocketId = (room) => {
-    console.log("sendingggg: ", socketId)
-    socket.emit('get_remote_socket_id', {requestingUser: socketId, room:room})
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   return (
     <div className="homepage">
@@ -340,7 +329,6 @@ function Home(props) {
         )}
       </div>
     </div>
-    
   );
 }
 
