@@ -13,6 +13,8 @@ import {
   END_CALL,
   PERMANENT_MUTE,
   LEAVE_ROOM_UPDATE_INFO,
+  UPDATE_SOCKET_IDS,
+  USER_LEFT_SOCKET_IDS,
 } from "../actions/types";
 
 const initialState = {
@@ -24,6 +26,7 @@ const initialState = {
     drawEnabled: true,
     selfMute: false,
     adminMute: false,
+    socketIds: [],
   },
 
   universal: {
@@ -182,6 +185,29 @@ const appReducer = (state = initialState, action) => {
 
     case LEAVE_ROOM_UPDATE_INFO: {
       return initialState;
+    }
+
+    case UPDATE_SOCKET_IDS: {
+      return {
+        ...state,
+        personal: {
+          ...state.personal,
+          socketIds: [...state.personal.socketIds, action.payload.socketId]
+        }
+      }
+    }
+
+    case USER_LEFT_SOCKET_IDS: {
+      var filtered = state.personal.socketIds.filter((user) => {
+        return user !== action.payload.socketId;
+      });
+      return {
+        ...state,
+        personal: {
+          ...state.personal,
+          socketIds: filtered
+        }
+      }
     }
 
     case END_CALL:

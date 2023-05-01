@@ -23,12 +23,12 @@ function App() {
       ) : (
         <>
           <Home socket={socket}/>
-          {/* <Header socket={socket}/>
+          <Header socket={socket}/>
           <ChatApp socket={socket} />
           <Canvas socket={socket} />
-          <Users socket={socket} /> */}
-          <Media socket={socket}/>
-          {/* <Sidebars/> */}
+          <Users socket={socket} />
+          {/* <Media socket={socket}/> */}
+          <Sidebars/>
         </>
       )}
     </div>

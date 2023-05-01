@@ -7,10 +7,9 @@ import {
   updateRoomInfo,
   createRoom,
   updateAllState,
-  updateSocketIds,
-  userLeftSocketIds,
 } from "../redux";
 import peer from "./WebRTC/peer";
+import { Socket } from "socket.io-client";
 
 function Home(props) {
   const socket = props.socket;
@@ -25,31 +24,15 @@ function Home(props) {
   const [newRoom, setNewRoom] = useState("");
   const [newRoomTitle, setNewRoomTitle] = useState("");
   const [room, setRoom] = useState("");
+
   const [errorMsg, setErrorMsg] = useState("");
 
-  const [peerConnections, setPeerConnections] = useState(new Map([]))
-  const [socketId, setSocketId] = useState('')
-  const [socketIds, setSocketIds] = useState([])
-
   const singleEffect = useRef(true);
-
-  // test function to check the values are set or not
-  useEffect(()=>{
-    console.log(socketId)
-    console.log(pdata)
-    getRemoteSocketId(pdata.room)
-  }, [socketId])
-
-  useEffect(()=>{
-    console.log(socketIds)
-  }, [socketIds])
 
   useEffect(() => {
     if (singleEffect.current) {
       socket.on("new_joinee", (data) => {
         dispatch(updateRoomInfo({ username: data.username }));
-        dispatch(updateSocketIds({socketId: data.socketId}))
-        socket.emit('set_socket_id_self', {socketId: data.socketId})
       });
 
       socket.on("update_all_state", (data) => {
@@ -58,13 +41,7 @@ function Home(props) {
 
       socket.on("create_room_valid", (data) => {
         dispatch(createRoom({ username: data.username, room: data.room, roomTitle: data.roomTitle }));
-        socket.emit('set_socket_id_self', {socketId: data.socketId})
       });
-
-      socket.on('set_socket_id_self', (data) => {
-        console.log("setting socket id")
-        setSocketId(data.socketId)
-      })
 
       socket.on("room_locked", (data)=>{
         setErrorMsg("The room is locked!");
@@ -92,11 +69,6 @@ function Home(props) {
         socket.emit("invalid_leave_exit_room", data);
       });
 
-      socket.on("remove_disconnected_user", (data) => {
-        dispatch(leaveRoom({username: data.username}))
-        dispatch(userLeftSocketIds({socketId: data.socketId}))
-      })
-
       singleEffect.current = false;
     }
   }, [socket]);
@@ -117,6 +89,7 @@ function Home(props) {
             break;
           }
         }
+        console.log('check 3')
         socket.emit("userCheck", {
           exitRoom: data.exitRoom,
           vun: vun,
@@ -124,6 +97,7 @@ function Home(props) {
           username: data.username,
           locked: uniData.locked,
         });
+        console.log('check 2')
       };
       socket.on("get_users_list", func);
       return () => socket.off("get_users_list", func);
@@ -161,6 +135,7 @@ function Home(props) {
       setErrorMsg("Please enter room name!");
     } else {
       socket.emit("new_room", { username: username, room: newRoom, roomTitle: newRoomTitle });
+      handleLocalDescription();
     }
 
     // dispatch(createRoom({ username: username, room: newRoom }));
@@ -179,8 +154,10 @@ function Home(props) {
     } else if (username === "") {
       setErrorMsg("Username cannot be empty!");
     } else {
-      await socket.emit("join_room", { username: username, room: room });
+      socket.emit("join_room", { username: username, room: room });
+      const offer = await handleLocalDescription();
       console.log("sending offer")
+      socket.emit("send:offer", {offer, room})
     }
 
     // dispatch(joinRoom({ username, room }));
@@ -190,34 +167,159 @@ function Home(props) {
     setRoom("");
   };
 
-  const handleRequestSocketId = (data) => {
-    socket.emit('sent_socket_id', {...data, socketId: socketId})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  const [remoteSocketId, setRemoteSocketId] = useState(null);
+  const [myStream, setMyStream] = useState();
+  const [remoteStream, setRemoteStream] = useState();
+
+  const handleLocalDescription = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    });
+    const offer = await peer.setLocalDescription();
+    console.log("local description set")
+    setMyStream(stream);
+    return offer;
+  };
+
+  const handleRemoteDescription = async ({newUserOffer, newUser}) => {
+    const ans = await peer.setRemoteDescription(newUserOffer);
+    console.log("remote description set || sending answer")
+    socket.emit("set:remote:answer", {ans, newUser, username: pdata.username})
+    console.log('answer sent!')
+  };
+
+  const handleRemoteAnswer = async ({ans, username}) => {
+    await peer.setRemoteAnswer(ans, username)
+    console.log("remote answer set")
   }
 
-  const handleSetRemoteSocketIds = (data) => {
-    dispatch(updateSocketIds({socketId: data.data.socketId}))
-    console.log("all socket ids receiveddd")
-  }
+  const handleIncommingCall = useCallback(
+    async ({ from, offer }) => {
+      setRemoteSocketId(from);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: true,
+      });
+      setMyStream(stream);
+      console.log(`Incoming Call`, from, offer);
+      const ans = await peer.getAnswer(offer);
+      socket.emit("call:accepted", { to: from, ans });
+    },
+    [socket]
+  );
+
+  const sendStreams = useCallback(() => {
+    for (const track of myStream.getTracks()) {
+      peer.peer.addTrack(track, myStream);
+    }
+  }, [myStream]);
+
+  const handleCallAccepted = useCallback(
+    ({ from, ans }) => {
+      peer.setLocalDescription(ans);
+      console.log("Call Accepted!");
+      sendStreams();
+    },
+    [sendStreams]
+  );
+
+  const handleNegoNeeded = useCallback(async () => {
+    const offer = await peer.getOffer();
+    socket.emit("peer:nego:needed", { offer, to: remoteSocketId });
+  }, [remoteSocketId, socket]);
 
   useEffect(() => {
-    socket.on('socket_id_request', handleRequestSocketId)
-    socket.on('set_remote_socket_ids', handleSetRemoteSocketIds)
+    peer.peer.addEventListener("negotiationneeded", handleNegoNeeded);
+    return () => {
+      peer.peer.removeEventListener("negotiationneeded", handleNegoNeeded);
+    };
+  }, [handleNegoNeeded]);
+
+  const handleNegoNeedIncomming = useCallback(
+    async ({ from, offer }) => {
+      const ans = await peer.getAnswer(offer);
+      socket.emit("peer:nego:done", { to: from, ans });
+    },
+    [socket]
+  );
+
+  const handleNegoNeedFinal = useCallback(async ({ ans }) => {
+    await peer.setLocalDescription(ans);
+  }, []);
+
+  useEffect(() => {
+    peer.peer.addEventListener("track", async (ev) => {
+      const remoteStream = ev.streams;
+      console.log("GOT TRACKS!!");
+      setRemoteStream(remoteStream[0]);
+    });
+  }, []);
+
+  useEffect(() => {
+    socket.on("incomming:call", handleIncommingCall);
+    socket.on("call:accepted", handleCallAccepted);
+    socket.on("peer:nego:needed", handleNegoNeedIncomming);
+    socket.on("peer:nego:final", handleNegoNeedFinal);
+    socket.on("set:remote:description", handleRemoteDescription);
+    socket.on("set:remote:answer", handleRemoteAnswer);
 
     return () => {
-      socket.off("socket_id_request", handleRequestSocketId);
-      socket.off('set_remote_socket_ids', handleSetRemoteSocketIds)
+      socket.off("incomming:call", handleIncommingCall);
+      socket.off("call:accepted", handleCallAccepted);
+      socket.off("peer:nego:needed", handleNegoNeedIncomming);
+      socket.off("peer:nego:final", handleNegoNeedFinal);
+      socket.off("set:remote:description", handleRemoteDescription);
+      socket.off("set:remote:answer", handleRemoteAnswer)
     };
   }, [
     socket,
-    handleRequestSocketId,
-    handleSetRemoteSocketIds,
+    handleIncommingCall,
+    handleCallAccepted,
+    handleNegoNeedIncomming,
+    handleNegoNeedFinal,
+    handleRemoteDescription,
+    handleRemoteAnswer,
   ]);
 
 
-  const getRemoteSocketId = (room) => {
-    console.log("sendingggg: ", socketId)
-    socket.emit('get_remote_socket_id', {requestingUser: socketId, room:room})
-  }
+
 
 
 

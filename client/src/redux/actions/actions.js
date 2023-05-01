@@ -13,6 +13,8 @@ import {
   END_CALL,
   PERMANENT_MUTE,
   LEAVE_ROOM_UPDATE_INFO,
+  UPDATE_SOCKET_IDS,
+  USER_LEFT_SOCKET_IDS,
 } from "./types";
 
 export const joinRoom = (roomInfo) => {
@@ -108,3 +110,17 @@ export const leaveRoomUpdateInfo = (roomInfo) => {
     payload: roomInfo,
   };
 };
+
+export const updateSocketIds = (roomInfo) => {
+  return {
+    type: UPDATE_SOCKET_IDS,
+    payload: roomInfo
+  }
+}
+
+export const userLeftSocketIds = (roomInfo) => {
+  return {
+    type: USER_LEFT_SOCKET_IDS,
+    payload: roomInfo
+  }
+}

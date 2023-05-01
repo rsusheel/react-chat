@@ -21,11 +21,16 @@ const io = new Server(server, {
   },
 });
 
-const emailToSocketIdMap = new Map();
-const socketidToEmailMap = new Map();
+const socketIdToRoom = new Map();
+const socketIdtoUsername = new Map()
 
 io.on("connection", (socket) => {
   console.log("user connected at " + socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("user disconnected: ", socketIdToRoom.get(socket.id))
+    io.to(socketIdToRoom.get(socket.id)).emit('remove_disconnected_user', {room: socketIdToRoom.get(socket.id), socketId: socket.id, username: socketIdtoUsername.get(socket.id)})
+  })
 
   socket.on("join_room", (data) => {
     if (io.sockets.adapter.rooms.get(data.room)) {
@@ -36,7 +41,6 @@ io.on("connection", (socket) => {
         room: data.room,
         exitRoom: exitRoom,
       });
-      console.log('check 1')
     }else{
       var exitRoom = Math.random().toString();
       socket.join(exitRoom);
@@ -79,13 +83,18 @@ io.on("connection", (socket) => {
   socket.on("leave_exit_room", (data) => {
     socket.leave(data.exitRoom);
     socket.join(data.room);
-    socket.to(data.room).emit("new_joinee", data);
+    socketIdToRoom.set(socket.id, data.room)
+    socketIdtoUsername.set(socket.id, data.username)
+    socket.to(data.room).emit("new_joinee", {...data, socketId: socket.id});
   });
 
   socket.on("new_room", (data) => {
     if (!io.sockets.adapter.rooms.get(data.room)) {
       socket.join(data.room);
-      io.to(data.room).emit("create_room_valid", data);
+      socketIdToRoom.set(socket.id, data.room)
+      socketIdtoUsername.set(socket.id,data.username)
+      console.log("socket id of the creator is: ", socket.id)
+      io.to(data.room).emit("create_room_valid", {...data, socketId: socket.id});
     }else{
       var exitRoom = Math.random().toString();
       socket.join(exitRoom)
@@ -93,6 +102,11 @@ io.on("connection", (socket) => {
       socket.leave(exitRoom)
     }
   });
+
+  socket.on('set_socket_id_self', (data) => {
+    console.log(data)
+    io.to(data.socketId).emit('set_socket_id_self', data);
+  })
 
   socket.on("update_all", (data) => {
     socket.to(data.room).emit("update_all_state", data);
@@ -154,7 +168,14 @@ io.on("connection", (socket) => {
     io.to(data.room).emit("dend_call_all", {data});
   });
 
+  socket.on("get_remote_socket_id", (data)=>{
+    socket.to(data.room).emit('socket_id_request', {data})
+  })
 
+  socket.on('sent_socket_id', (data)=>{
+    console.log(data)
+    io.to(data.data.requestingUser).emit('set_remote_socket_ids', {data})
+  })
 
 
 
@@ -163,7 +184,7 @@ io.on("connection", (socket) => {
   console.log(`Socket Connected`, socket.id);
 
   socket.on("user:call", ({ to, offer }) => {
-    io.to(to).emit("incomming:call", { from: socket.id, offer });
+    socket.broadcast.to(to).emit("incomming:call", { from: socket.id, offer });
   });
 
   socket.on("call:accepted", ({ to, ans }) => {
@@ -179,6 +200,98 @@ io.on("connection", (socket) => {
     console.log("peer:nego:done", ans);
     io.to(to).emit("peer:nego:final", { from: socket.id, ans });
   });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  socket.on("send:offer", ({offer, room})=>{
+    socket.broadcast.to(room).emit("set:remote:description",{newUserOffer: offer, newUser: socket.id})
+  })
+
+  socket.on("set:remote:answer", ({ans, newUser, username})=>{
+    socket.to(newUser).emit("set:remote:answer", {ans, username})
+    console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+  })
+
+
+
+
+
+
+
+
+
+
+
 
 
 

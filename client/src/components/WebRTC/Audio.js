@@ -55,6 +55,7 @@ function Audio(props) {
 
   const handleNegoNeeded = useCallback(async () => {
     const offer = await peer.getOffer();
+    console.log("nego needed")
     socket.emit("peer:nego:needed", { offer, to: remoteSocketId });
   }, [remoteSocketId, socket]);
 
