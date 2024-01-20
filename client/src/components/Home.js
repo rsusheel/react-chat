@@ -19,6 +19,7 @@ function Home(props) {
   const creator = useSelector((state) => state.personal.creator);
   const uniData = useSelector((state) => state.universal);
   const pdata = useSelector((state) => state.personal);
+  const socketIds = useSelector((state) => state.personal.socketIds)
 
   const [username, setUsername] = useState("");
   const [newRoom, setNewRoom] = useState("");
@@ -153,7 +154,7 @@ function Home(props) {
 
     return () => {
       socket.off("new_joinee", newJoinee);
-      socket.off("update_all_state", updateAllStates);
+      socket.off("update_all_states", updateAllStates);
       socket.off("create_room_valid", createRoomValid);
       socket.off("set_socket_id_self", setSocketIdSelf);
       socket.off("room_locked", roomLocked);
@@ -241,6 +242,79 @@ function Home(props) {
     setNewRoomTitle("");
     setRoom("");
   };
+
+  /* -----------------------------WebRTC------------------------------ */
+
+  // creates a new RTCPeerConnection object and returns same
+  const createRTCPeerConnection = () => {
+    const peer = new RTCPeerConnection({
+      iceServers: [
+        {
+          urls: [
+            "stun:stun.l.google.com:19302",
+            "stun:global.stun.twilio.com:3478",
+          ],
+        },
+      ],
+    })
+    return peer;
+  }
+
+  // create a offer from RTCPeerConnection object, sets local description with the offer created and returns the offer
+  const createOfferAndSetLocalDescription = async (peer) => {
+    const offer = await peer.createOffer()
+    await peer.setLocalDescription(new RTCSessionDescription(offer))
+    return offer
+  }
+
+  // sets the remote answer received from the user
+  const setRemoteAnswer = async (peer, ans) => {
+    await peer.setRemoteDescription(new RTCSessionDescription(ans))
+  }
+
+  // sets the remote description for the peer object, creates answer for it and returns the answer
+  const setRemoteDescriptionAndCreateAnswer = async (offer, peer) => {
+    await peer.setRemoteDescription(offer)
+    const ans = await peer.createAnswer()
+    return ans
+  }
+
+  const initiateRTCConnection = () => {
+    console.log('logging socket ids')
+    console.log(socketIds)
+    socketIds.forEach(async function(value,index){
+      const peer = createRTCPeerConnection()
+      const peerMap = new Map(peerConnections)
+      peerMap.set(value,peer)
+      setPeerConnections(peerMap)
+      const offer = await createOfferAndSetLocalDescription(peer)
+      await socket.emit('send_offer_to_users', {offer, source: socketId, target: value})
+    })
+  }
+
+  useEffect(()=>{
+    initiateRTCConnection()
+  },[socketIds])
+
+  useEffect(()=>{
+    socket.on('set_remote_offer_send_answer', async (data)=>{
+      const peer = createRTCPeerConnection()
+      const peerMap = new Map(peerConnections)
+      peerMap.set(data.source,peer)
+      setPeerConnections(peerMap)
+      const ans = await setRemoteDescriptionAndCreateAnswer(data.offer, peer)
+      socket.emit('send_answer_to_user', {...data, answer: ans})
+    })
+    socket.on('set_remote_answer', (data) => {
+      setRemoteAnswer(peerConnections.get(data.target), data.answer)
+    })
+    return () => {
+      socket.off('set_remote_ofer_send_answer')
+      socket.off('set_remote_answer')
+    }
+  },[socket])
+
+  /* ---------------------------WebRTC-END---------------------------- */
 
   return (
     <div className="homepage">
