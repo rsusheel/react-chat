@@ -211,6 +211,20 @@
   padding: 4px 0px 2px 0;
 }
 
+.user-notification{
+  font-size: 14px;
+  text-align: center;
+  margin: 7px 0;
+}
+
+.join-notification{
+  color: #3068CC;
+}
+
+.leave-notification{
+  color: red;
+}
+
 .top-bar-menu-btn{
   display: none;
 }

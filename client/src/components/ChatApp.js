@@ -34,6 +34,29 @@ function ChatApp(props) {
           ["i:" + data.message, data.time, data.user],
         ]);
       });
+      
+
+      socket.on("new_joinee", (data) => {
+        setMessages((current) => [
+          ...current,
+          ["j:" + data.username + " joined the chat!"]
+        ])
+      })
+
+      socket.on("remove_disconnected_user", (data) => {
+        setMessages((current) => [
+          ...current,
+          ["l:" + data.username + " left the chat."]
+        ])
+      })
+
+      socket.on("dleave_room", (data) => {
+        setMessages((current) => [
+          ...current,
+          ["l:" + data.username + " left the chat."]
+        ])
+      })
+
       singleEffect.current = false;
     }
   }, [socket]);
@@ -126,7 +149,7 @@ function ChatApp(props) {
                     </div>
                   </div>
                 );
-              } else {
+              } else if (item[0][0] === "i") {
                 list = (
                   <div className="user-cover">
                     <div className="user">
@@ -142,6 +165,14 @@ function ChatApp(props) {
                     </div>
                   </div>
                 );
+              } else if(item[0][0] === "j") {
+                list = (
+                  <div className="join-notification user-notification">{item[0].slice(2)}</div>
+                )
+              } else if(item[0][0] === "l") {
+                list = (
+                  <div className="leave-notification user-notification">{item[0].slice(2)}</div>
+                )
               }
               return list;
             })}
