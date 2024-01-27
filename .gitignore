@@ -1,7 +1,7 @@
-/client/node_modules
-/client/.vscode
-/client/build
-/server/node_modules
-/server/.vscode
-.vscode
+/client/node_modules/
+/client/.vscode/
+/client/build/
+/server/node_modules/
+/server/.vscode/
+.vscode/
 
