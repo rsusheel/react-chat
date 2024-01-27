@@ -7,9 +7,9 @@
 }
 
 .homepage-inner{
-    height: 200px;
+    height: 300px;
     position: relative;
-    top: calc(50vh - 100px);
+    top: calc(50vh - 150px);
     left: calc(50vw - 160px);
     width: 320px;
 }

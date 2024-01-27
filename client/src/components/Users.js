@@ -2,8 +2,6 @@ import React from "react";
 import { useEffect, useRef } from "react";
 import "./Users.css";
 import { useDispatch, useSelector } from "react-redux";
-import AdminControls from "./AdminControls";
-import UsersHead from "./UsersHead";
 import { toggleChatAll, toggleDrawAll, toggleMuteAll } from "../redux";
 import UserControls from "./UserControls";
 
@@ -37,9 +35,7 @@ function Users(props) {
 
   return (
     <div className="users-bar">
-
-      {data.creator? <AdminControls socket={socket}/>: <UsersHead socket={socket}/>}
-
+      <UserControls socket={socket}/>
       <div className="user-card">
         <div className="user-card-title">Connected Users</div>
         <div className="user-list">
@@ -83,7 +79,7 @@ function Users(props) {
           })}
         </div>
       </div>
-      <UserControls socket={socket}/>
+      
     </div>
   );
 }

@@ -10,7 +10,7 @@ import {
   updateSocketIds,
   userLeftSocketIds,
 } from "../redux";
-import peer from "./WebRTC/peer";
+// import peer from "./WebRTC/peer";
 
 function Home(props) {
   const socket = props.socket;
@@ -316,10 +316,24 @@ function Home(props) {
 
   /* ---------------------------WebRTC-END---------------------------- */
 
+  const handleJoinRoom = (e) => {
+    if(e.key=='Enter'){
+      e.preventDefault();
+      joinRoomBtn(e);
+    }
+  }
+
+  const handleCreateRoom = (e) => {
+    if(e.key=='Enter'){
+      e.preventDefault();
+      createRoomBtn(e);
+    }
+  }
+
   return (
     <div className="homepage">
       <div className="homepage-inner">
-        <div className="home-title">Collab</div>
+        <div className="home-title">React Chat</div>
         <div className="enter-username">
           <div className="home-username-title">Username</div>
           <input
@@ -337,6 +351,7 @@ function Home(props) {
             className="home-joinroom home-input"
             type="text"
             onChange={changeRoom}
+            onKeyPress={handleJoinRoom}
             placeholder="Room Name"
             value={room}
           />
@@ -359,6 +374,7 @@ function Home(props) {
                 className="home-createroom home-input"
                 type="text"
                 onChange={changeNewRoom}
+                onKeyPress={handleCreateRoom}
                 placeholder="Room Name"
                 value={newRoom}
               />

@@ -1,20 +1,20 @@
 .users-bar{
     width: 330px;
     position: absolute;
-    right: 30px;
+    right: 0px;
     top: 0;
-    border-left: 2px solid #3068CC;
     height: 100vh;
     background-color: rgb(41, 37, 37);
     transition: 0.4s;
 }
 
 .user-card{
+    height: calc(100vh - 70px);
     width: 330px;
     background-color: rgb(41, 37, 37);
     position: absolute;
     right: 0;
-    top: 80px;
+    top: 60px;
     box-sizing: border-box;
 }
 
@@ -33,7 +33,7 @@
     box-sizing: border-box;
     width: 280px;
     margin: auto;
-    height: calc(100vh - 153px);
+    height: calc(100vh - 50px);
     overflow-y: scroll;
     padding-top: 40px;
     padding-bottom: 30px;
@@ -55,6 +55,11 @@
     grid-template-columns: 40px 1fr;
 }
 
+.common-avatar{
+    display: grid;
+    align-items: center;
+}
+
 .self-user{
     background-color: rgb(93, 93, 93);
 }
@@ -66,4 +71,10 @@
 .common-username{
     display: grid;
     align-items: center;
+}
+  
+@media screen and (max-width: 700px) {
+    .users-bar{
+        right: -330px;
+    }
 }
