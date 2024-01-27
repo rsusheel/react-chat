@@ -1,9 +1,17 @@
-FROM node:16.19.0
+# Use a small base image for production
+FROM nginx:1.21.1-alpine
+
+# Set the working directory to /app
 WORKDIR /app
-ENV PATH /app/node_modules/.bin:$PATH
-COPY package.json ./
-COPY package-lock.json ./
-RUN npm install --silent
-RUN npm install react-scripts@5.0.1 -g --silent
-COPY . ./
-CMD ["npm", "start"]
+
+# Copy the build files to the container
+COPY build/ /app
+
+# Setup nginx for react build
+RUN sed -i "s,/usr/share/nginx/html,/app,g" /etc/nginx/conf.d/default.conf
+
+# Expose port 80 for the application
+EXPOSE 80
+
+# Start Nginx and serve the application
+CMD ["nginx", "-g", "daemon off;"]
