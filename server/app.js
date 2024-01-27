@@ -218,7 +218,63 @@ io.on("connection", (socket) => {
     socket.to(newUser).emit("set:remote:answer", { ans, username });
     console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
   });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  socket.on('send_offer_to_users', (data) => {
+    socket.to(data.target).emit('set_remote_offer_send_answer', data)
+  })
+  
+  socket.on('send_answer_to_user', (data)=>{
+    socket.to(data.source).emit('set_remote_answer', data)
+  })
+
+
+
+
+
+
+
+
+
+
+  
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 server.listen(3001, () => {
   console.log("server is running on 3001");
