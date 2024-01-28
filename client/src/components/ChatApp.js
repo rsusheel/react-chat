@@ -20,7 +20,7 @@ function ChatApp(props) {
   const singleEffect = useRef(true);
 
   const handleKeyPress = (e) => {
-    if(e.key=='Enter'){
+    if(e.key=='Enter' && e.shiftKey){
       e.preventDefault();
       sendMessage(e);
     }
@@ -61,18 +61,6 @@ function ChatApp(props) {
     }
   }, [socket]);
 
-  // useEffect(() => {
-  //   if(window.innerWidth<700){
-  //     document.getElementsByClassName("main-form")[0].style.width = "100%";
-  //     document.getElementsByClassName("main-form")[0].style.right = "0";
-  //     document.getElementsByClassName("users-bar")[0].style.right = "-330px";
-  //   }else{
-  //     document.getElementsByClassName("main-form")[0].style.width = "calc(100vw - 330px)";
-  //     document.getElementsByClassName("main-form")[0].style.right = "330px";
-  //     document.getElementsByClassName("users-bar")[0].style.right = "0px";
-  //   }
-  // }, []);
-
   const sendMessage = (e) => {
     e.preventDefault();
     if (message === "") {
@@ -92,6 +80,7 @@ function ChatApp(props) {
       room: room,
     });
     setMessage((prev) => "");
+    console.log(message)
   };
 
   const bottom = useRef(null);
@@ -144,7 +133,7 @@ function ChatApp(props) {
                         <div className="you-username">{item[2]}</div>
                       )}
 
-                      <div className="you-message">{item[0].slice(2)}</div>
+                      <div className="you-message"><pre className="message-pre">{item[0].slice(2)}</pre></div>
                       <div className="you-indicator">{item[1]}</div>
                     </div>
                   </div>
@@ -160,7 +149,7 @@ function ChatApp(props) {
                       ) : (
                         <div className="user-username">{item[2]}</div>
                       )}
-                      <div className="user-message">{item[0].slice(2)}</div>
+                      <div className="user-message"><pre className="message-pre">{item[0].slice(2)}</pre></div>
                       <div className="user-indicator">{item[1]}</div>
                     </div>
                   </div>
@@ -180,7 +169,7 @@ function ChatApp(props) {
         </div>
         <div className="message-and-button-container">
           <form onSubmit={sendMessage} className="message-and-button">
-            <input
+            <textarea
               type="text"
               className="textarea"
               onChange={myMessage}

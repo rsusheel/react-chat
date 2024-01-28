@@ -63,6 +63,8 @@
   border-radius: 100px 0 0 100px;
   border: 1px solid rgba(0, 0, 0, .4);
   border-right: none;
+  resize: none;
+  /* overflow-y: hidden; */
 }
 
 .textarea:focus{
@@ -202,7 +204,6 @@
   hyphens: manual;
 }
 
-
 .you-username{
   font-size: 13px;
   font-weight: bold;
@@ -227,6 +228,10 @@
 
 .top-bar-menu-btn{
   display: none;
+}
+
+.message-pre{
+  margin: 0;
 }
 
 @media screen and (max-width: 700px) {

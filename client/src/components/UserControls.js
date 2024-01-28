@@ -10,12 +10,12 @@ function UserControls(props) {
 
   const socket = props.socket;
 
-  useEffect(() => {
-    if (data.creator) {
-      document.getElementsByClassName("user-controls-btns")[0].style.gridTemplateColumns = "1fr 1fr 1fr";
-      // document.getElementsByClassName("user-controls-btn")[0].style.width ="250px";
-    }
-  }, [data.creator]);
+  // useEffect(() => {
+  //   if (data.creator) {
+  //     document.getElementsByClassName("user-controls-btns")[0].style.gridTemplateColumns = "1fr 1fr 1fr";
+  //     // document.getElementsByClassName("user-controls-btn")[0].style.width ="250px";
+  //   }
+  // }, [data.creator]);
 
   const singleEffect = useRef(true);
   useEffect(() => {
@@ -97,8 +97,22 @@ function UserControls(props) {
               </svg>
             </div>
           )
+        ) : uniData.locked ? (
+          <div className="user-controls-btn">
+            <svg
+              height="19"
+              viewBox="0 0 14 18"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12.8 7H11V4.6C11 1.703 9.665 0 7 0C4.334 0 3 1.703 3 4.6V7H1C0.447 7 0 7.646 0 8.199V16C0 16.549 0.428 17.139 0.951 17.307L2.148 17.694C2.7829 17.8791 3.43892 17.9819 4.1 18H9.9C10.5608 17.9821 11.2166 17.8789 11.851 17.693L13.047 17.306C13.571 17.139 14 16.549 14 16V8.199C14 7.646 13.352 7 12.8 7ZM9 7H5V4.199C5 2.754 5.797 2 7 2C8.203 2 9 2.754 9 4.199V7Z"
+                fill="rgb(160, 141, 235)"
+              />
+            </svg>
+          </div>
         ) : (
-          <></>
+          <div></div>
         )}
 
         <div onClick={leaveCallBtn} className="user-controls-btn">
