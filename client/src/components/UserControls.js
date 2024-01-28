@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "./UserControls.css";
-import { toggleLockRoom, toggleMuteSelf, toggleDrawSelf, leaveRoom, leaveRoomUpdateInfo } from "../redux";
+import { toggleLockRoom, leaveRoom, leaveRoomUpdateInfo } from "../redux";
 
 function UserControls(props) {
   const data = useSelector((state) => state.personal);
@@ -9,13 +9,6 @@ function UserControls(props) {
   const dispatch = useDispatch();
 
   const socket = props.socket;
-
-  // useEffect(() => {
-  //   if (data.creator) {
-  //     document.getElementsByClassName("user-controls-btns")[0].style.gridTemplateColumns = "1fr 1fr 1fr";
-  //     // document.getElementsByClassName("user-controls-btn")[0].style.width ="250px";
-  //   }
-  // }, [data.creator]);
 
   const singleEffect = useRef(true);
   useEffect(() => {
@@ -40,19 +33,10 @@ function UserControls(props) {
   }, [socket]);
 
   const lockRoomBtn = (e) => {
-    socket.emit("toggle_lock_room", data.room);
-  };
-
-  const selfMuteBtn = (e) => {
-    dispatch(toggleMuteSelf());
-  };
-
-  const selfDrawBtn = (e) => {
-    dispatch(toggleDrawSelf());
+    socket.emit("toggle_lock_room", {room: data.room, roomLocked: uniData.locked});
   };
 
   const leaveCallBtn = (e) => {
-    // dispatch(leaveRoom({username: data.username}))
     socket.emit("leave_room", {room: data.room, username: data.username})
   }
 

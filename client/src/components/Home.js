@@ -10,7 +10,6 @@ import {
   updateSocketIds,
   userLeftSocketIds,
 } from "../redux";
-// import peer from "./WebRTC/peer";
 
 function Home(props) {
   const socket = props.socket;
@@ -45,13 +44,9 @@ function Home(props) {
     setRoom(e.target.value);
   };
 
-  //Socket events functions - START
-
   const newJoinee = (data) => {
     dispatch(updateRoomInfo({ username: data.username }));
     dispatch(updateSocketIds({ socketId: data.socketId }));
-    console.log("new joineee");
-    console.log(data);
     socket.emit("set_socket_id_self", { socketId: data.socketId });
   };
 
@@ -71,7 +66,6 @@ function Home(props) {
   };
 
   const setSocketIdSelf = (data) => {
-    console.log("setting socket id");
     setSocketId(data.socketId);
   };
 
@@ -131,7 +125,6 @@ function Home(props) {
 
   const setRemoteSocketIds = (data) => {
     dispatch(updateSocketIds({ socketId: data.data.socketId }));
-    console.log("all socket ids receiveddd");
   };
 
   //Socket events functions - END
@@ -235,7 +228,6 @@ function Home(props) {
       setErrorMsg("Username cannot be empty!");
     } else {
       await socket.emit("join_room", { username: username, room: room });
-      console.log("sending offer");
     }
     setUsername("");
     setNewRoom("");
@@ -280,8 +272,6 @@ function Home(props) {
   }
 
   const initiateRTCConnection = () => {
-    console.log('logging socket ids')
-    console.log(socketIds)
     socketIds.forEach(async function(value,index){
       const peer = createRTCPeerConnection()
       const peerMap = new Map(peerConnections)
@@ -317,14 +307,14 @@ function Home(props) {
   /* ---------------------------WebRTC-END---------------------------- */
 
   const handleJoinRoom = (e) => {
-    if(e.key=='Enter'){
+    if(e.key==='Enter'){
       e.preventDefault();
       joinRoomBtn(e);
     }
   }
 
   const handleCreateRoom = (e) => {
-    if(e.key=='Enter'){
+    if(e.key==='Enter'){
       e.preventDefault();
       createRoomBtn(e);
     }

@@ -1,37 +1,13 @@
 import React from "react";
-import { useEffect, useRef } from "react";
 import "./Users.css";
-import { useDispatch, useSelector } from "react-redux";
-import { toggleChatAll, toggleDrawAll, toggleMuteAll } from "../redux";
+import { useSelector } from "react-redux";
 import UserControls from "./UserControls";
-
 
 function Users(props) {
   const socket = props.socket;
 
   const data = useSelector((state) => state.personal);
   const users = useSelector((state) => state.universal.users);
-
-  const dispatch=useDispatch()
-
-  const singleEffect = useRef(true);
-  useEffect(() => {
-    if (singleEffect.current) {
-      socket.on("dtoggle_mute_all", () => {
-        dispatch(toggleMuteAll());
-      });
-
-      socket.on("dtoggle_draw_all", () => {
-        dispatch(toggleDrawAll());
-      });
-
-      socket.on("dtoggle_chat_all", () => {
-        dispatch(toggleChatAll());
-      });
-
-      singleEffect.current = false;
-    }
-  }, [socket]);
 
   return (
     <div className="users-bar">

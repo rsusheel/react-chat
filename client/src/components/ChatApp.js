@@ -1,6 +1,7 @@
 import "./ChatApp.css";
 import { useState, useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { updateChat } from "../redux";
 
 function ChatApp(props) {
   const socket = props.socket;
@@ -13,6 +14,8 @@ function ChatApp(props) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
 
+  const dispatch = useDispatch();
+
   let myMessage = (e) => {
     setMessage(e.target.value);
   };
@@ -20,34 +23,70 @@ function ChatApp(props) {
   const singleEffect = useRef(true);
 
   const handleKeyPress = (e) => {
-    if(e.key=='Enter' && e.shiftKey){
+    if(e.key==='Enter' && e.shiftKey){
       e.preventDefault();
       sendMessage(e);
     }
   }
 
+  const createChat = () => {
+    let chat = [];
+    let testMessage=data.personal.chat;
+    for(let i=0; i<testMessage.length; i++){
+      let temp;
+      if(testMessage[i][0][0]==="o") {
+        temp=testMessage[i];
+        temp[0]="i:"+temp[0].slice(2);
+      } else if(testMessage[i][0][0]==="i") {
+        temp=testMessage[i];
+        temp[0]="o:"+temp[0].slice(2);
+      } else {
+        continue;
+      }
+      chat.push(temp);
+    }
+    return chat;
+  }
+
+  // useEffect(() => {
+  //   if(data.username === uniData.users[0]){
+  //     let chat = createChat();
+  //     socket.emit("transfer_chat", {chat, newUser: socketData.socketId})
+  //   }
+  // }, [data])
+
   useEffect(() => {
+
     if (singleEffect.current) {
       socket.on("recieve_message", (data) => {
+        const temp = ["i:" + data.message, data.time, data.user];
         setMessages((current) => [
           ...current,
-          ["i:" + data.message, data.time, data.user],
+          temp,
         ]);
+        dispatch(updateChat({chat: temp}))
       });
       
 
-      socket.on("new_joinee", (data) => {
+      socket.on("new_joinee", (socketData) => {
         setMessages((current) => [
           ...current,
-          ["j:" + data.username + " joined the chat!"]
+          ["j:" + socketData.username + " joined the chat!"]
         ])
+        dispatch(updateChat({chat: ["j:" + socketData.username + " joined the chat!"]}));
+
+        if(data.username === uniData.users[0]){
+          let chat = createChat();
+          socket.emit("transfer_chat", {chat, newUser: socketData.socketId})
+        }
       })
 
       socket.on("remove_disconnected_user", (data) => {
         setMessages((current) => [
           ...current,
           ["l:" + data.username + " left the chat."]
-        ])
+        ]);
+        dispatch(updateChat({chat: ["l:" + data.username + " left the chat."]}))
       })
 
       socket.on("dleave_room", (data) => {
@@ -55,6 +94,27 @@ function ChatApp(props) {
           ...current,
           ["l:" + data.username + " left the chat."]
         ])
+        dispatch(updateChat({chat: ["l:" + data.username + " left the chat."]}))
+      })
+
+      socket.on("dtoggle_lock_room", (data) => {
+        if(!data.roomLocked){
+          setMessages((current) => [
+            ...current,
+            ["r:Room locked."]
+          ]);
+          dispatch(updateChat({chat: ["r:Room locked."]}))
+        } else {
+          setMessages((current) => [
+            ...current,
+            ["u:Room unlocked."]
+          ])
+          dispatch(updateChat({chat: ["u:Room unlocked."]}))
+        }
+      });
+
+      socket.on("set_old_chat", (socketData) => {
+        setMessages(socketData.chat);
       })
 
       singleEffect.current = false;
@@ -73,6 +133,7 @@ function ChatApp(props) {
       minute: "2-digit",
     });
     setMessages((current) => [...current, ["o:" + message, time, username]]);
+    dispatch(updateChat({chat: ["o:" + message, time, username]}))
     socket.emit("send_message", {
       message: message,
       time: time,
@@ -80,7 +141,6 @@ function ChatApp(props) {
       room: room,
     });
     setMessage((prev) => "");
-    console.log(message)
   };
 
   const bottom = useRef(null);
@@ -108,7 +168,7 @@ function ChatApp(props) {
         <div className="chat-drag">
           <div>React Chat</div>
           <div className="room-details">
-            {uniData.room} {uniData.roomTitle == "" ? (<></>) : (<span>({uniData.roomTitle})</span>)}<br/>
+            {uniData.room} {uniData.roomTitle === "" ? (<></>) : (<span>({uniData.roomTitle})</span>)}<br/>
             {data.username}
           </div>
           <div onClick={expandMenu} className="top-bar-menu-btn">
@@ -161,6 +221,14 @@ function ChatApp(props) {
               } else if(item[0][0] === "l") {
                 list = (
                   <div className="leave-notification user-notification">{item[0].slice(2)}</div>
+                )
+              } else if(item[0][0] === "r") {
+                list = (
+                  <div className="lock-notification">{item[0].slice(2)}</div>
+                )
+              } else if(item[0][0] === "u") {
+                list = (
+                  <div className="lock-notification">{item[0].slice(2)}</div>
                 )
               }
               return list;

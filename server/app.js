@@ -93,6 +93,10 @@ io.on("connection", (socket) => {
     socket.to(data.room).emit("new_joinee", { ...data, socketId: socket.id });
   });
 
+  socket.on("transfer_chat", (data) => {
+    io.to(data.newUser).emit("set_old_chat", data)
+  })
+
   socket.on("new_room", (data) => {
     if (!io.sockets.adapter.rooms.get(data.room)) {
       socket.join(data.room);
@@ -122,31 +126,10 @@ io.on("connection", (socket) => {
 
   socket.on("send_message", (data) => {
     socket.to(data.room).emit("recieve_message", data);
-    // socket.broadcast.emit("recieve_message", data);
   });
 
-  socket.on("start_drawing", (data) => {
-    socket.to(data.room).emit("rstart_drawing", data);
-  });
-
-  socket.on("draw", (data) => {
-    socket.to(data.room).emit("rdraw", data);
-  });
-
-  socket.on("toggle_mute_all", (room) => {
-    io.to(room).emit("dtoggle_mute_all");
-  });
-
-  socket.on("toggle_draw_all", (room) => {
-    io.to(room).emit("dtoggle_draw_all");
-  });
-
-  socket.on("toggle_chat_all", (room) => {
-    io.to(room).emit("dtoggle_chat_all");
-  });
-
-  socket.on("toggle_lock_room", (room) => {
-    io.to(room).emit("dtoggle_lock_room");
+  socket.on("toggle_lock_room", (data) => {
+    io.to(data.room).emit("dtoggle_lock_room", data);
   });
 
   socket.on("leave_room", (data) => {
@@ -187,51 +170,6 @@ io.on("connection", (socket) => {
 
   console.log(`Socket Connected`, socket.id);
 
-  socket.on("user:call", ({ to, offer }) => {
-    socket.broadcast.to(to).emit("incomming:call", { from: socket.id, offer });
-  });
-
-  socket.on("call:accepted", ({ to, ans }) => {
-    io.to(to).emit("call:accepted", { from: socket.id, ans });
-  });
-
-  socket.on("peer:nego:needed", ({ to, offer }) => {
-    console.log("peer:nego:needed", offer);
-    io.to(to).emit("peer:nego:needed", { from: socket.id, offer });
-  });
-
-  socket.on("peer:nego:done", ({ to, ans }) => {
-    console.log("peer:nego:done", ans);
-    io.to(to).emit("peer:nego:final", { from: socket.id, ans });
-  });
-
-  socket.on("send:offer", ({ offer, room }) => {
-    socket.broadcast
-      .to(room)
-      .emit("set:remote:description", {
-        newUserOffer: offer,
-        newUser: socket.id,
-      });
-  });
-
-  socket.on("set:remote:answer", ({ ans, newUser, username }) => {
-    socket.to(newUser).emit("set:remote:answer", { ans, username });
-    console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-  });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   socket.on('send_offer_to_users', (data) => {
     socket.to(data.target).emit('set_remote_offer_send_answer', data)
   })
@@ -240,41 +178,7 @@ io.on("connection", (socket) => {
     socket.to(data.source).emit('set_remote_answer', data)
   })
 
-
-
-
-
-
-
-
-
-
-  
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 server.listen(3001, () => {
   console.log("server is running on 3001");

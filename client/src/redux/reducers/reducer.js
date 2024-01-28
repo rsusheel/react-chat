@@ -4,17 +4,12 @@ import {
   UPDATE_ROOM_INFO,
   CREATE_ROOM,
   UPDATE_ALL_STATE,
-  TOGGLE_CHAT_ALL,
-  TOGGLE_DRAW_ALL,
-  TOGGLE_DRAW_SELF,
   TOGGLE_LOCK_ROOM,
-  TOGGLE_MUTE_ALL,
-  TOGGLE_MUTE_SELF,
   END_CALL,
-  PERMANENT_MUTE,
   LEAVE_ROOM_UPDATE_INFO,
   UPDATE_SOCKET_IDS,
   USER_LEFT_SOCKET_IDS,
+  UPDATE_CHAT,
 } from "../actions/types";
 
 const initialState = {
@@ -22,11 +17,8 @@ const initialState = {
     username: "",
     room: "",
     creator: false,
-    chatEnabled: true,
-    drawEnabled: true,
-    selfMute: false,
-    adminMute: false,
     socketIds: [],
+    chat: [],
   },
 
   universal: {
@@ -35,9 +27,6 @@ const initialState = {
     users: [],
     creator: "",
     locked: false,
-    chatEnabled: true,
-    drawEnabled: true,
-    allMute: false,
   },
 };
 
@@ -91,64 +80,6 @@ const appReducer = (state = initialState, action) => {
           users: action.payload.users,
           creator: action.payload.creator,
           locked: action.payload.locked,
-          chatEnabled: action.payload.chatEnabled,
-          drawEnabled: action.payload.drawEnabled,
-          allMute: action.payload.allMute,
-        },
-      };
-
-    case TOGGLE_CHAT_ALL:
-      return {
-        personal: {
-          ...state.personal,
-        },
-        universal: {
-          ...state.universal,
-          chatEnabled: !state.universal.chatEnabled,
-        },
-      };
-
-    case TOGGLE_DRAW_ALL:
-      return {
-        ...state,
-        personal: {
-          ...state.personal,
-          drawEnabled: false,
-        },
-        universal: {
-          ...state.universal,
-          drawEnabled: !state.universal.drawEnabled,
-        },
-      };
-
-    case TOGGLE_DRAW_SELF:
-      return {
-        ...state,
-        personal: {
-          ...state.personal,
-          drawEnabled: !state.personal.drawEnabled,
-        },
-      };
-
-    case TOGGLE_MUTE_ALL:
-      return {
-        ...state,
-        personal: {
-          ...state.personal,
-          selfMute: true,
-        },
-        universal: {
-          ...state.universal,
-          allMute: !state.universal.allMute,
-        },
-      };
-
-    case TOGGLE_MUTE_SELF:
-      return {
-        ...state,
-        personal: {
-          ...state.personal,
-          selfMute: !state.personal.selfMute,
         },
       };
 
@@ -158,15 +89,6 @@ const appReducer = (state = initialState, action) => {
         universal: {
           ...state.universal,
           locked: !state.universal.locked,
-        },
-      };
-
-    case PERMANENT_MUTE:
-      return {
-        ...state,
-        personal: {
-          ...state.personal,
-          adminMute: !state.personal.adminMute,
         },
       };
 
@@ -198,7 +120,7 @@ const appReducer = (state = initialState, action) => {
     }
 
     case USER_LEFT_SOCKET_IDS: {
-      var filtered = state.personal.socketIds.filter((user) => {
+      let filtered = state.personal.socketIds.filter((user) => {
         return user !== action.payload.socketId;
       });
       return {
@@ -206,6 +128,16 @@ const appReducer = (state = initialState, action) => {
         personal: {
           ...state.personal,
           socketIds: filtered
+        }
+      }
+    }
+
+    case UPDATE_CHAT: {
+      return {
+        ...state,
+        personal: {
+          ...state.personal,
+          chat: [...state.personal.chat, action.payload.chat]
         }
       }
     }

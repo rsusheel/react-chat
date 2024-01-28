@@ -226,6 +226,13 @@
   color: red;
 }
 
+.lock-notification{
+  font-size: 14px;
+  text-align: center;
+  margin: 7px 0;
+  color: rgba(0, 0, 0, 0.31);
+}
+
 .top-bar-menu-btn{
   display: none;
 }
