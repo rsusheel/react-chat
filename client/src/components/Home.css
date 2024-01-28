@@ -1,7 +1,7 @@
 .homepage{
     display: grid;
     position: fixed;
-    height: 100vh;
+    height: 100dvh;
     width: 100vw;
     color: white;
 }

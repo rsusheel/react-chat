@@ -113,7 +113,7 @@
   /* width: 100%; */
   max-width: 700px;
   margin: auto;
-  height: calc(100vh - 130px);
+  height: calc(100dvh - 130px);
   background-color: white;
   overflow-y: scroll;
   text-align: left;
