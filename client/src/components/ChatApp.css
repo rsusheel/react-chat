@@ -230,6 +230,21 @@
 }
 
 @media screen and (max-width: 700px) {
+  .chat-drag{
+    position: fixed;
+    top: 0;
+  }
+
+  .message-area-container{
+    position: fixed;
+    top: 60px;
+  }
+
+  .message-and-button-container{
+    position: fixed;
+    bottom: 0;
+  }
+
   .top-bar-menu-btn {
     display: block;
   }
